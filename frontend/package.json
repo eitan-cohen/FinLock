@@ -1,1 +1,12 @@
-/opt/hostedapp/node/root/package.json
+{
+  "name": "finlock-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "echo \"No frontend tests specified\""
+  }
+}
