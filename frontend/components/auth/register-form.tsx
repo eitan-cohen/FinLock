@@ -23,7 +23,7 @@ export function RegisterForm({ onToggleMode }: RegisterFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const { setUser, setLoading } = useAppStore();
+  const { setUser, setLoading, setCardDetails } = useAppStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +48,12 @@ export function RegisterForm({ onToggleMode }: RegisterFormProps) {
       if (response.success && response.data) {
         apiClient.setToken(response.data.token);
         setUser(response.data.user);
+
+        const cardResp = await apiClient.getCardDetails();
+        if (cardResp.success && cardResp.data) {
+          setCardDetails(cardResp.data.card);
+        }
+
         setLoading(false);
       } else {
         setError(response.error || 'Registration failed');
