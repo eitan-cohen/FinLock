@@ -12,6 +12,7 @@ import { PostPurchaseScreen } from '@/components/screens/post-purchase-screen';
 import { HistoryScreen } from '@/components/screens/history-screen';
 import { ProfileScreen } from '@/components/screens/profile-screen';
 import { IntroScreen } from '@/components/screens/intro-screen';
+import { CardScreen } from '@/components/screens/card-screen';
 import { apiClient } from '@/lib/api';
 
 export function FinLockApp() {
