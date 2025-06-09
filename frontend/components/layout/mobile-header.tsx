@@ -11,6 +11,7 @@ import {
   Home, 
   CreditCard, 
   History,
+  HelpCircle,
   Menu,
   X
 } from 'lucide-react';
@@ -30,6 +31,7 @@ export function MobileHeader() {
     { id: 'home', label: 'Home', icon: Home },
     { id: 'authorize', label: 'Authorize', icon: CreditCard },
     { id: 'history', label: 'History', icon: History },
+    { id: 'intro', label: 'Card Guide', icon: HelpCircle },
     { id: 'profile', label: 'Profile', icon: User },
   ];
 

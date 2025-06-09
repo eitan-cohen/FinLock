@@ -43,9 +43,10 @@ interface AppState {
   cardStatus: CardStatus | null;
   
   // UI state
-  currentScreen: 'home' | 'authorize' | 'success' | 'post-purchase' | 'history' | 'profile';
+  currentScreen: 'intro' | 'home' | 'authorize' | 'success' | 'post-purchase' | 'history' | 'profile';
   isLoading: boolean;
   error: string | null;
+  introCompleted: boolean;
   
   // Actions
   setUser: (user: User | null) => void;
@@ -55,6 +56,7 @@ interface AppState {
   setCurrentScreen: (screen: AppState['currentScreen']) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  setIntroCompleted: (completed: boolean) => void;
   logout: () => void;
 }
 
@@ -70,6 +72,7 @@ export const useAppStore = create<AppState>()(
       currentScreen: 'home',
       isLoading: false,
       error: null,
+      introCompleted: false,
       
       // Actions
       setUser: (user) => set({ user, isAuthenticated: !!user }),
@@ -79,20 +82,23 @@ export const useAppStore = create<AppState>()(
       setCurrentScreen: (currentScreen) => set({ currentScreen }),
       setLoading: (isLoading) => set({ isLoading }),
       setError: (error) => set({ error }),
-      logout: () => set({ 
-        user: null, 
-        isAuthenticated: false, 
-        budgets: [], 
-        transactions: [], 
+      setIntroCompleted: (introCompleted) => set({ introCompleted }),
+      logout: () => set({
+        user: null,
+        isAuthenticated: false,
+        budgets: [],
+        transactions: [],
         cardStatus: null,
-        currentScreen: 'home'
+        currentScreen: 'home',
+        introCompleted: false
       }),
     }),
     {
       name: 'finlock-storage',
-      partialize: (state) => ({ 
-        user: state.user, 
-        isAuthenticated: state.isAuthenticated 
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+        introCompleted: state.introCompleted
       }),
     }
   )
