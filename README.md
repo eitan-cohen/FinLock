@@ -182,4 +182,3 @@ For support and questions, please open an issue in the GitHub repository.
 
 - [Backend Documentation](./backend/README.md)
 - [Frontend Documentation](./frontend/README.md)
-- [API Documentation](./docs/api.md)
