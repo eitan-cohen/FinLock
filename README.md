@@ -44,7 +44,7 @@ npm run migrate
 npm run dev
 ```
 
-The backend will be available at `http://localhost:3001`
+The backend will be available at `http://localhost:3000`
 
 ### Frontend Setup
 
@@ -126,12 +126,12 @@ DATABASE_URL=postgresql://username:password@localhost:5432/finlock
 REDIS_URL=redis://localhost:6379
 JWT_SECRET=your-jwt-secret
 LITHIC_API_KEY=your-lithic-api-key
-PORT=3001
+PORT=3000
 ```
 
 ### Frontend Environment Variables
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_API_URL=http://localhost:3000
 NEXT_PUBLIC_APP_NAME=FinLock
 ```
 
