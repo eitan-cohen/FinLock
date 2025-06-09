@@ -11,11 +11,11 @@ import { SuccessScreen } from '@/components/screens/success-screen';
 import { PostPurchaseScreen } from '@/components/screens/post-purchase-screen';
 import { HistoryScreen } from '@/components/screens/history-screen';
 import { ProfileScreen } from '@/components/screens/profile-screen';
-import { CardScreen } from '@/components/screens/card-screen';
+import { IntroScreen } from '@/components/screens/intro-screen';
 import { apiClient } from '@/lib/api';
 
 export function FinLockApp() {
-  const { isAuthenticated, currentScreen, setLoading } = useAppStore();
+  const { isAuthenticated, currentScreen, introCompleted, setCurrentScreen, setLoading } = useAppStore();
 
   useEffect(() => {
     // Initialize app
@@ -29,6 +29,12 @@ export function FinLockApp() {
       }
     }
   }, [setLoading]);
+
+  useEffect(() => {
+    if (isAuthenticated && !introCompleted) {
+      setCurrentScreen('intro');
+    }
+  }, [isAuthenticated, introCompleted, setCurrentScreen]);
 
   if (!isAuthenticated) {
     return <AuthScreen />;
@@ -48,6 +54,8 @@ export function FinLockApp() {
         return <HistoryScreen />;
       case 'profile':
         return <ProfileScreen />;
+      case 'intro':
+        return <IntroScreen />;
       case 'card':
         return <CardScreen />;
       default:
