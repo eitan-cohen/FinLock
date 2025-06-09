@@ -1,6 +1,6 @@
 
 const crypto = require('crypto');
-const { getCardByLithicId } = require('../models/card');
+const { getCardByLithicId, getCardById } = require('../models/card');
 const { createTransaction, getTransactionByLithicId, updateTransactionStatus } = require('../models/transaction');
 const { getActiveSessionByUserId, updateSessionStatus } = require('../models/authSession');
 const { updateBudgetSpent } = require('../models/budget');
@@ -149,7 +149,7 @@ const handleTransactionSettled = async (transaction) => {
     // This is a simplified implementation - in production, you'd have more sophisticated budget matching
     
     // Automatically refreeze card after successful transaction
-    const card = await getCardByLithicId(transaction.card_id);
+  const card = await getCardById(transaction.card_id);
     if (card) {
       await freezeCardLithic(card.lithic_card_id);
       await updateCardStatus(card.id, 'frozen');
