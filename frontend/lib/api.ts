@@ -40,6 +40,16 @@ export interface CardStatus {
   authorizedCategory?: string;
 }
 
+export interface CardDetails {
+  id: string;
+  status: string;
+  maskedNumber: string | null;
+  expiryMonth: number;
+  expiryYear: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AuthorizeRequest {
   amount: number;
   category: string;
@@ -130,6 +140,10 @@ class ApiClient {
   // Card endpoints
   async getCardStatus(): Promise<ApiResponse<CardStatus>> {
     return this.request('/api/card/status');
+  }
+
+  async getCardDetails(): Promise<ApiResponse<CardDetails>> {
+    return this.request('/api/card/details');
   }
 
   async authorizeTransaction(data: AuthorizeRequest): Promise<ApiResponse<{ success: boolean; expiresAt: string }>> {

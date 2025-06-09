@@ -11,6 +11,7 @@ import { SuccessScreen } from '@/components/screens/success-screen';
 import { PostPurchaseScreen } from '@/components/screens/post-purchase-screen';
 import { HistoryScreen } from '@/components/screens/history-screen';
 import { ProfileScreen } from '@/components/screens/profile-screen';
+import { CardScreen } from '@/components/screens/card-screen';
 import { apiClient } from '@/lib/api';
 
 export function FinLockApp() {
@@ -47,6 +48,8 @@ export function FinLockApp() {
         return <HistoryScreen />;
       case 'profile':
         return <ProfileScreen />;
+      case 'card':
+        return <CardScreen />;
       default:
         return <HomeScreen />;
     }
