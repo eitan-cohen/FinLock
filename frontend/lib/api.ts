@@ -1,5 +1,8 @@
 
-const API_BASE_URL = 'http://localhost:3001';
+// Determine the base URL for all API requests.
+// `NEXT_PUBLIC_API_URL` is injected by Next.js at build time. If it is
+// not provided, default to the local backend.
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 export interface ApiResponse<T = any> {
   success: boolean;
