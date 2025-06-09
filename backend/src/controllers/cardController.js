@@ -1,6 +1,10 @@
 
 const { getCardByUserId, updateCardStatus } = require('../models/card');
-const { createAuthSession, getActiveSessionByUserId } = require('../models/authSession');
+const {
+  createAuthSession,
+  getActiveSessionByUserId,
+  updateSessionStatus
+} = require('../models/authSession');
 const { unfreezeCard, freezeCardLithic, getCardDetails: getLithicCardDetails } = require('../services/lithic');
 const { client: redisClient } = require('../config/redis');
 const logger = require('../utils/logger');
