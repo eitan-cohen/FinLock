@@ -146,7 +146,12 @@ class ApiClient {
 
   // Transaction endpoints
   async getTransactions(): Promise<ApiResponse<Transaction[]>> {
-    return this.request('/api/transactions');
+    const response = await this.request('/api/transactions');
+    if (response.success && response.data && !Array.isArray(response.data)) {
+      // unwrap { transactions: [...] }
+      return { ...response, data: (response.data as any).transactions };
+    }
+    return response;
   }
 }
 
