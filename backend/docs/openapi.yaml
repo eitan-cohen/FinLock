@@ -1,0 +1,544 @@
+
+openapi: 3.0.3
+info:
+  title: FinLock API
+  description: |
+    FinLock is a fintech application that provides freeze-by-default virtual cards. 
+    Users must authorize their credit card for each transaction in real time by temporarily unfreezing it.
+  version: 1.0.0
+  contact:
+    name: FinLock Team
+    email: support@finlock.com
+
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+  - url: https://api.finlock.com/api
+    description: Production server
+
+security:
+  - BearerAuth: []
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      description: Creates a new user account and automatically provisions a virtual card
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - firstName
+                - lastName
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+                password:
+                  type: string
+                  minLength: 8
+                  example: "securePassword123"
+                firstName:
+                  type: string
+                  minLength: 2
+                  maxLength: 50
+                  example: "John"
+                lastName:
+                  type: string
+                  minLength: 2
+                  maxLength: 50
+                  example: "Doe"
+                phoneNumber:
+                  type: string
+                  pattern: '^\+?[1-9]\d{1,14}$'
+                  example: "+1234567890"
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '409':
+          description: User already exists
+        '400':
+          description: Validation error
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticates user and returns JWT token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+
+  /auth/profile:
+    get:
+      tags:
+        - Authentication
+      summary: Get user profile
+      description: Returns the current user's profile information
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+
+  /card/status:
+    get:
+      tags:
+        - Card Management
+      summary: Get card status
+      description: Returns the current status of the user's virtual card
+      responses:
+        '200':
+          description: Card status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardStatus'
+
+  /card/authorize:
+    post:
+      tags:
+        - Card Management
+      summary: Authorize transaction
+      description: Temporarily unfreezes the card with specified limits
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - amountLimit
+                - timeLimit
+              properties:
+                amountLimit:
+                  type: number
+                  minimum: 0.01
+                  example: 50.00
+                  description: Maximum amount allowed for transactions
+                categoryMcc:
+                  type: string
+                  length: 4
+                  example: "5411"
+                  description: Merchant Category Code to restrict transactions
+                timeLimit:
+                  type: integer
+                  minimum: 1
+                  maximum: 1440
+                  example: 30
+                  description: Time limit in minutes
+                merchantName:
+                  type: string
+                  maxLength: 100
+                  example: "Starbucks"
+                  description: Specific merchant name restriction
+      responses:
+        '200':
+          description: Card authorized successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorizeResponse'
+        '409':
+          description: Active session already exists
+
+  /card/freeze:
+    post:
+      tags:
+        - Card Management
+      summary: Freeze card
+      description: Immediately freezes the card and cancels any active authorization
+      responses:
+        '200':
+          description: Card frozen successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FreezeResponse'
+
+  /budgets:
+    get:
+      tags:
+        - Budget Management
+      summary: Get user budgets
+      description: Returns all budgets for the current user
+      responses:
+        '200':
+          description: Budgets retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BudgetsResponse'
+
+    post:
+      tags:
+        - Budget Management
+      summary: Create budget
+      description: Creates a new budget for a specific category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - category
+                - limit
+                - period
+              properties:
+                category:
+                  type: string
+                  example: "groceries"
+                limit:
+                  type: number
+                  minimum: 0.01
+                  example: 500.00
+                period:
+                  type: string
+                  enum: [daily, weekly, monthly]
+                  example: "monthly"
+      responses:
+        '201':
+          description: Budget created successfully
+        '409':
+          description: Budget already exists for this category
+
+  /transactions:
+    get:
+      tags:
+        - Transactions
+      summary: Get transaction history
+      description: Returns paginated transaction history for the user
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, authorized, settled, declined, cancelled]
+      responses:
+        '200':
+          description: Transactions retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionsResponse'
+
+  /transactions/analytics:
+    get:
+      tags:
+        - Transactions
+      summary: Get spending analytics
+      description: Returns spending analytics and insights
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            default: "30 days"
+            example: "30 days"
+      responses:
+        '200':
+          description: Analytics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsResponse'
+
+  /webhooks/lithic:
+    post:
+      tags:
+        - Webhooks
+      summary: Lithic webhook endpoint
+      description: Handles webhooks from Lithic card issuing platform
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event_type:
+                  type: string
+                  example: "transaction.created"
+                payload:
+                  type: object
+      responses:
+        '200':
+          description: Webhook processed successfully
+        '401':
+          description: Invalid signature
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    RegisterResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "User registered successfully"
+        user:
+          $ref: '#/components/schemas/User'
+        card:
+          $ref: '#/components/schemas/Card'
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    LoginResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Login successful"
+        user:
+          $ref: '#/components/schemas/User'
+        token:
+          type: string
+
+    UserProfile:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phoneNumber:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    Card:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [frozen, active, suspended, cancelled]
+        maskedNumber:
+          type: string
+          example: "****-****-****-1234"
+        createdAt:
+          type: string
+          format: date-time
+
+    CardStatus:
+      type: object
+      properties:
+        card:
+          $ref: '#/components/schemas/Card'
+        activeSession:
+          $ref: '#/components/schemas/AuthSession'
+
+    AuthSession:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        amountLimit:
+          type: number
+        categoryMcc:
+          type: string
+        merchantName:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+
+    AuthorizeResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        session:
+          $ref: '#/components/schemas/AuthSession'
+        card:
+          $ref: '#/components/schemas/Card'
+
+    FreezeResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        card:
+          $ref: '#/components/schemas/Card'
+
+    Budget:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        category:
+          type: string
+        limit:
+          type: number
+        spent:
+          type: number
+        remaining:
+          type: number
+        period:
+          type: string
+        utilizationPercentage:
+          type: integer
+
+    BudgetsResponse:
+      type: object
+      properties:
+        budgets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Budget'
+        totalBudgets:
+          type: integer
+
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        amount:
+          type: number
+        category:
+          type: string
+        merchantName:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    TransactionsResponse:
+      type: object
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+        pagination:
+          type: object
+          properties:
+            limit:
+              type: integer
+            offset:
+              type: integer
+            total:
+              type: integer
+
+    AnalyticsResponse:
+      type: object
+      properties:
+        analytics:
+          type: object
+          properties:
+            summary:
+              type: object
+              properties:
+                totalSpent:
+                  type: number
+                totalTransactions:
+                  type: integer
+                averageTransactionAmount:
+                  type: number
+            categoryBreakdown:
+              type: array
+              items:
+                type: object
+                properties:
+                  category:
+                    type: string
+                  totalAmount:
+                    type: number
+                  transactionCount:
+                    type: integer
+                  percentage:
+                    type: integer
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
