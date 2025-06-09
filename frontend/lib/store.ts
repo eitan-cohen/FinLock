@@ -32,18 +32,29 @@ export interface CardStatus {
   authorizedCategory?: string;
 }
 
+export interface CardDetails {
+  id: string;
+  status: string;
+  maskedNumber: string | null;
+  expiryMonth: number;
+  expiryYear: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface AppState {
   // Auth state
   user: User | null;
   isAuthenticated: boolean;
-  
+
   // App state
   budgets: Budget[];
   transactions: Transaction[];
   cardStatus: CardStatus | null;
+  cardDetails: CardDetails | null;
   
   // UI state
-  currentScreen: 'intro' | 'home' | 'authorize' | 'success' | 'post-purchase' | 'history' | 'profile';
+  currentScreen: 'intro' | 'home' | 'authorize' | 'success' | 'post-purchase' | 'history' | 'profile' | 'card';
   isLoading: boolean;
   error: string | null;
   introCompleted: boolean;
@@ -53,6 +64,7 @@ interface AppState {
   setBudgets: (budgets: Budget[]) => void;
   setTransactions: (transactions: Transaction[]) => void;
   setCardStatus: (status: CardStatus | null) => void;
+  setCardDetails: (details: CardDetails | null) => void;
   setCurrentScreen: (screen: AppState['currentScreen']) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -69,6 +81,7 @@ export const useAppStore = create<AppState>()(
       budgets: [],
       transactions: [],
       cardStatus: null,
+      cardDetails: null,
       currentScreen: 'home',
       isLoading: false,
       error: null,
@@ -79,6 +92,7 @@ export const useAppStore = create<AppState>()(
       setBudgets: (budgets) => set({ budgets }),
       setTransactions: (transactions) => set({ transactions }),
       setCardStatus: (cardStatus) => set({ cardStatus }),
+      setCardDetails: (cardDetails) => set({ cardDetails }),
       setCurrentScreen: (currentScreen) => set({ currentScreen }),
       setLoading: (isLoading) => set({ isLoading }),
       setError: (error) => set({ error }),

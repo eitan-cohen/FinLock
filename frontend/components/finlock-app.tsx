@@ -56,6 +56,8 @@ export function FinLockApp() {
         return <ProfileScreen />;
       case 'intro':
         return <IntroScreen />;
+      case 'card':
+        return <CardScreen />;
       default:
         return <HomeScreen />;
     }

@@ -29,6 +29,7 @@ export function MobileHeader() {
 
   const navigation = [
     { id: 'home', label: 'Home', icon: Home },
+    { id: 'card', label: 'Card', icon: CreditCard },
     { id: 'authorize', label: 'Authorize', icon: CreditCard },
     { id: 'history', label: 'History', icon: History },
     { id: 'intro', label: 'Card Guide', icon: HelpCircle },

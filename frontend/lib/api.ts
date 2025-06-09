@@ -40,6 +40,16 @@ export interface CardStatus {
   authorizedCategory?: string;
 }
 
+export interface CardDetails {
+  id: string;
+  status: string;
+  maskedNumber: string | null;
+  expiryMonth: number;
+  expiryYear: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AuthorizeRequest {
   amount: number;
   category: string;
@@ -132,6 +142,10 @@ class ApiClient {
     return this.request('/api/card/status');
   }
 
+  async getCardDetails(): Promise<ApiResponse<CardDetails>> {
+    return this.request('/api/card/details');
+  }
+
   async authorizeTransaction(data: AuthorizeRequest): Promise<ApiResponse<{ success: boolean; expiresAt: string }>> {
     return this.request('/api/card/authorize', {
       method: 'POST',
@@ -146,7 +160,12 @@ class ApiClient {
 
   // Transaction endpoints
   async getTransactions(): Promise<ApiResponse<Transaction[]>> {
-    return this.request('/api/transactions');
+    const response = await this.request('/api/transactions');
+    if (response.success && response.data && !Array.isArray(response.data)) {
+      // unwrap { transactions: [...] }
+      return { ...response, data: (response.data as any).transactions };
+    }
+    return response;
   }
 }
 
