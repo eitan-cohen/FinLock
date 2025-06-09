@@ -1,5 +1,6 @@
 
-const API_BASE_URL = 'http://localhost:3001';
+// Base URL for the API. Falls back to localhost if the env variable is not set.
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 export interface ApiResponse<T = any> {
   success: boolean;

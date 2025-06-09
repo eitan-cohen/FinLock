@@ -51,6 +51,10 @@ src/
 
 ## Environment Variables
 
+The frontend reads `NEXT_PUBLIC_API_URL` to determine the base URL of the
+backend API. If this variable is not set, the application defaults to
+`http://localhost:3001`.
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3000
 NEXT_PUBLIC_APP_NAME=FinLock
