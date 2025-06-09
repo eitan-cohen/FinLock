@@ -38,7 +38,11 @@ export function HistoryScreen() {
     try {
       const response = await apiClient.getTransactions();
       if (response.success && response.data) {
-        setTransactions(response.data);
+        // Handle API response that may wrap transactions in an object
+        const txs = Array.isArray(response.data)
+          ? response.data
+          : (response.data as any).transactions;
+        setTransactions(txs || []);
       } else {
         // Use mock data if API fails
         setTransactions(MOCK_TRANSACTIONS);
