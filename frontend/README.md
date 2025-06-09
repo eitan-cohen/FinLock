@@ -4,7 +4,7 @@ Next.js React frontend for the FinLock fintech application.
 
 ## Features
 
-- Modern React with Next.js 14
+- Modern React with Next.js 15.3.3
 - Tailwind CSS for styling
 - TypeScript for type safety
 - Responsive design
