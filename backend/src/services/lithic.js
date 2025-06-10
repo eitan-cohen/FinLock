@@ -1,17 +1,21 @@
 
-const axios = require('axios');
+const Lithic = require('lithic');
 const logger = require('../utils/logger');
 
 class LithicService {
   constructor() {
     this.apiKey = process.env.LITHIC_API_KEY;
     this.baseURL = process.env.LITHIC_BASE_URL || 'https://sandbox.lithic.com';
-    this.client = axios.create({
+
+    // Lithic's SDK allows overriding the baseURL so we use the provided
+    // environment variables to configure the client. If `LITHIC_BASE_URL`
+    // points at the sandbox we also set the environment accordingly.
+    const environment = this.baseURL.includes('sandbox') ? 'sandbox' : 'production';
+
+    this.client = new Lithic({
+      apiKey: this.apiKey,
       baseURL: this.baseURL,
-      headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json'
-      }
+      environment
     });
   }
 
@@ -39,22 +43,22 @@ class LithicService {
     }
 
     try {
-      const response = await this.client.post('/v1/cards', {
+      const response = await this.client.cards.create({
         type: 'VIRTUAL',
-        account_token: process.env.LITHIC_ACCOUNT_TOKEN, // You'll need to set this
-        card_program_token: process.env.LITHIC_CARD_PROGRAM_TOKEN, // You'll need to set this
+        account_token: process.env.LITHIC_ACCOUNT_TOKEN,
+        card_program_token: process.env.LITHIC_CARD_PROGRAM_TOKEN,
         memo: `FinLock card for ${userData.email}`,
-        spend_limit: 10000, // $100 default limit in cents
+        spend_limit: 10000,
         spend_limit_duration: 'MONTHLY',
-        state: 'PAUSED' // Start frozen
+        state: 'PAUSED'
       });
 
-      logger.info('Lithic card created successfully:', { 
-        cardToken: response.data.token,
-        userId: userData.userId 
+      logger.info('Lithic card created successfully:', {
+        cardToken: response.token,
+        userId: userData.userId
       });
 
-      return response.data;
+      return response;
     } catch (error) {
       logger.error('Error creating Lithic card:', error.response?.data || error.message);
       throw new Error('Failed to create virtual card');
@@ -72,7 +76,7 @@ class LithicService {
       const { amountLimit, categoryMcc, merchantName } = controls;
 
       // Update card state to OPEN
-      await this.client.patch(`/v1/cards/${cardToken}`, {
+      await this.client.cards.update(cardToken, {
         state: 'OPEN'
       });
 
@@ -85,7 +89,9 @@ class LithicService {
           blocked_mcc: categoryMcc ? undefined : [], // Allow all if no specific MCC
         };
 
-        await this.client.post(`/v1/cards/${cardToken}/spending_controls`, spendingControls);
+        await this.client.post(`/v1/cards/${cardToken}/spending_controls`, {
+          body: spendingControls
+        });
       }
 
       logger.info('Card unfrozen successfully:', { cardToken, controls });
@@ -103,7 +109,7 @@ class LithicService {
     }
 
     try {
-      await this.client.patch(`/v1/cards/${cardToken}`, {
+      await this.client.cards.update(cardToken, {
         state: 'PAUSED'
       });
 
@@ -116,8 +122,8 @@ class LithicService {
 
   async getCardDetails(cardToken) {
     try {
-      const response = await this.client.get(`/v1/cards/${cardToken}`);
-      return response.data;
+      const response = await this.client.cards.retrieve(cardToken);
+      return response;
     } catch (error) {
       logger.error('Error getting card details:', error.response?.data || error.message);
       throw new Error('Failed to get card details');
@@ -126,11 +132,9 @@ class LithicService {
 
   async getTransactions(cardToken, limit = 50) {
     try {
-      const response = await this.client.get('/v1/transactions', {
-        params: {
-          card_token: cardToken,
-          page_size: limit
-        }
+      const response = await this.client.transactions.list({
+        card_token: cardToken,
+        page_size: limit
       });
       return response.data;
     } catch (error) {
